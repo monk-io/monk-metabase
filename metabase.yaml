@@ -1,0 +1,73 @@
+namespace: /metabase
+
+postgres:
+  defines: runnable
+  inherits: /postgres/12
+  containers:
+    defines: containers
+    postgres:
+      ports:
+        - 5432
+  variables:
+    db-user: <- $postgres-db-user
+    db-password: <- $postgres-db-password
+    db-port: <- $postgres-db-port
+    db-name: <- $postgres-db-name
+
+metabase:
+  defines: runnable
+  metadata:
+    defines: metadata
+    name: Metabase
+    description: Metabase is the easy, open source way for everyone in your company to ask questions and learn from data.
+    tags: analytics, sql, dashboard
+    website: https://www.metabase.com
+    source: https://github.com/metabase/metabase
+    publisher: "monk.io"
+    email: hello@monk.io
+  containers:
+    defines: containers
+    metabase:
+      image: metabase/metabase:latest
+      ports:
+        - <- `${metabase-port}:3000`
+  depends:
+    defines: depends
+    wait-for:
+      runnables:
+        - metabase/postgres
+      timeout: 60
+  variables:
+    defines: variables
+    mb-db-type:
+      env: MB_DB_TYPE
+      value: postgres
+    mb-db-dbname:
+      env: MB_DB_DBNAME
+      value: <- $postgres-db-name
+    mb-db-port:
+      env: MB_DB_PORT
+      value: <- $postgres-db-port
+    mb-db-user:
+      env: MB_DB_USER
+      value: <- $postgres-db-user
+    mb-db-pass:
+      env: MB_DB_PASS
+      value: <- $postgres-db-password
+    mb-db-host:
+      env: MB_DB_HOST
+      value: <- get-hostname("metabase/postgres", "postgres")
+
+stack:
+  defines: process-group
+  version: latest
+  runnable-list:
+    - /metabase/postgres
+    - /metabase/metabase
+  variables:
+    defines: variables
+    postgres-db-user: metabase
+    postgres-db-password: DB_PASS
+    postgres-db-port: 5432
+    postgres-db-name: metabase
+    metabase-port: 3000
