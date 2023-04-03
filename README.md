@@ -37,9 +37,9 @@ runnable  metabase/server    local       -        analytics, sql, dashboard
        └─🔌 open localhost:5432 -> 5432
 
 💡 You can inspect and manage your above stack with these commands:
-	monk logs (-f) metabase/metabase - Inspect logs
-	monk shell     metabase/metabase - Connect to the container's shell
-	monk do        metabase/metabase/action_name - Run defined action (if exists)
+  monk logs (-f) metabase/metabase - Inspect logs
+  monk shell     metabase/metabase - Connect to the container's shell
+  monk do        metabase/metabase/action_name - Run defined action (if exists)
 💡 Check monk help for more!
 ```
 

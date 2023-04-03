@@ -3,7 +3,7 @@ namespace: metabase
 
 db:
   defines: runnable
-  inherits: postgresql/db
+  inherits: postgresql/base
   metadata:
     private: true
   services:
@@ -25,6 +25,7 @@ db:
 server:
   defines: runnable
   metadata:
+    private: true
     name: Metabase
     description: Metabase is the easy, open source way for everyone in your company to ask questions and learn from data.
     tags: analytics, sql, dashboard
@@ -76,8 +77,17 @@ server:
       env: MB_DB_HOST
       value: <- connection-hostname("postgres")
 
-metabase:
+stack:
   defines: process-group
+  metadata:
+    name: Metabase
+    description: Metabase is the easy, open source way for everyone in your company to ask questions and learn from data.
+    tags: analytics, sql, dashboard
+    website: https://www.metabase.com
+    source: https://github.com/metabase/metabase
+    publisher: monk.io
+    email: hello@monk.io
+    icon: https://www.metabase.com/images/logo.svg
   runnable-list:
     - metabase/db
     - metabase/server
