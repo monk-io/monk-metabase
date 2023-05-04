@@ -3,8 +3,21 @@ namespace: metabase
 
 db:
   defines: runnable
-  inherits: postgresql/base
   metadata:
+    name: PostgreSQL
+    website: https://www.postgresql.org
+    source: https://github.com/postgres
+    publisher: monk.io
+    icon: https://www.postgresql.org/media/img/about/press/elephant.png
+    tags: PostgreSQL, database management system, open-source, object-relational, data types, indexing, query optimization, security, MVCC, community, Linux, Windows, macOS, programming languages, frameworks
+    description: |
+      PostgreSQL is a powerful open-source object-relational database management system (DBMS) that provides robustness, reliability, and performance to meet the demanding needs of enterprise-level applications. It was first released in 1989 and has since become one of the most popular and widely used relational databases in the world.
+
+      One of the key features of PostgreSQL is its flexibility, which allows it to be used in a wide range of applications, from small-scale projects to large, complex enterprise systems. It supports a wide range of data types, including arrays, hstore, and JSON, and provides advanced indexing and query optimization features to ensure fast and efficient data retrieval.
+
+      PostgreSQL also has a strong reputation for data security and integrity, with support for advanced security features like row-level security, data masking, and encryption. It also supports multi-version concurrency control (MVCC), which allows multiple transactions to access and modify data concurrently without interfering with each other.
+
+      In addition to its powerful features, PostgreSQL has a large and active community of developers and users who contribute to its development and provide support through forums, mailing lists, and other channels. It is available on multiple platforms, including Linux, Windows, and macOS, and can be used with a wide range of programming languages and frameworks, making it a versatile and reliable choice for database management in a wide range of applications.
     private: true
   services:
     postgres:
@@ -13,14 +26,23 @@ db:
       protocol: tcp
   variables:
     db_username:
-      value: <- `${postgres-db-user}`
+      env: POSTGRES_USER
+      value: <- $postgres-db-user default("metabase")
       type: string
     postgres_password:
-      value: <- `${postgres-db-password}`
+      env: POSTGRES_PASSWORD
+      value: <- $postgres-db-password default("metabase")
       type: string
     db_name:
-      value: <- `${postgres-db-name}`
+      env: POSTGRES_DB
+      value: <- $postgres-db-name default("metabase")
       type: string
+  containers:
+    postgres:
+      image: postgres
+      image-tag: latest
+      paths:
+        - <- `${monk-volume-path}/postgresql:/var/lib/postgresql/data`
 
 server:
   defines: runnable
@@ -41,8 +63,12 @@ server:
   containers:
     metabase:
       image: metabase/metabase:latest
-      ports:
-        - <- `${metabase-port}:3000`
+  services:
+    postgres:
+      container: metabase
+      port: 3000
+      protocol: tcp
+      host-port: 3000
   depends:
     wait-for:
       runnables:
@@ -59,7 +85,7 @@ server:
     mb-db-dbname:
       type: string
       env: MB_DB_DBNAME
-      value: <- `${postgres-db-name}`
+      value: <- $postgres-db-name default("metabase")
     mb-db-port:
       type: string
       env: MB_DB_PORT
@@ -67,11 +93,11 @@ server:
     mb-db-user:
       type: string
       env: MB_DB_USER
-      value: <- `${postgres-db-user}`
+      value: <- $postgres-db-user default("metabase")
     mb-db-pass:
       type: string
       env: MB_DB_PASS
-      value: <- `${postgres-db-password}`
+      value: <- $postgres-db-password default("metabase")
     mb-db-host:
       type: string
       env: MB_DB_HOST
@@ -97,10 +123,7 @@ stack:
       value: metabase
     postgres-db-password:
       type: string
-      value: DB_PASS
+      value: metabase
     postgres-db-name:
       type: string
       value: metabase
-    metabase-port:
-      type: string
-      value: 3000
