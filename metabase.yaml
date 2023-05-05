@@ -62,9 +62,10 @@ server:
       service: postgres
   containers:
     metabase:
-      image: metabase/metabase:latest
+      image: metabase/metabase
+      image-tag: latest
   services:
-    postgres:
+    server:
       container: metabase
       port: 3000
       protocol: tcp
